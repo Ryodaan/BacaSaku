@@ -1,4 +1,4 @@
-import { getUser, getUserID } from "@/controller/UserController";
+import { createUser, getUser, getUserID, updateUser, deleteUser } from "@/controller/UserController";
 
 export default async function (req, res) {
   try {
@@ -11,10 +11,13 @@ export default async function (req, res) {
         }
         break;
       case "POST":
+        await createUser(req,res);
         break;
-      case "PACT":
+      case "PATCH":
+        await updateUser(req,res);
         break;
       case "DELETE":
+        await deleteUser(req,res);
         break;
       default:
         res.setHeader("Allow", ["GET", "POST", "PATCH", "DELETE"]);
