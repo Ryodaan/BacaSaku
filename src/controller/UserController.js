@@ -1,5 +1,6 @@
 import prisma from "../../prisma/client";
-
+import jwt from "jsonwebtoken";
+import bcrypt from "bcrypt";
 export async function getUser(req, res) {
   const { skip } = req.query;
   const skipValue = skip ? skip : 0;
@@ -58,16 +59,49 @@ export async function getUserID(req, res) {
   }
 }
 
+
+export async function login(req, res) {
+  const {Username, Password} = req.body;
+
+  try {
+    const user = await prisma.user.findFirst({
+      where: { Username },
+    });
+
+    if (!user || !(await bcrypt.compare(Password, user.Password))) {
+      return res.status(401).json({ message: 'Username atau password salah' });
+    }
+    
+    const { Password: _, ...userData } = user;
+
+    const token = jwt.sign({ userId: user.UserID }, 'iniadalahaku', { expiresIn: '1h' });
+
+    res.status(200).json({
+      message: 'Login berhasil',
+      data: userData,
+      token,
+    });
+
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({
+      message: 'Internal server error',
+      error: error,
+    });
+  }
+}
+
 export async function createUser(req, res) {
-  const { UserID, NamaLengkap, Alamat, Username, Email, Password } = req.body;
+  const { NamaLengkap, Alamat, Username, Email, Password } = req.body;
+
+  const userpassword = await bcrypt.hash(Password, 10);
 
   try {
     let user = await prisma.user.create({
       data: {
-        UserID,
         NamaLengkap,
-        Alamat,
-        Password,
+        Alamat, 
+        Password : userpassword,
         Username,
         Email,
       },

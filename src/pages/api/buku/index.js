@@ -1,11 +1,13 @@
-import { getBuku, createBuku, updateBuku, deleteBuku } from "@/controller/BukuController";
+import { getBuku, getBukuID, createBuku, updateBuku, deleteBuku } from "@/controller/BukuController";
+import { cors, middleware } from "@/helpers/middleware";
 // import { createUser, getUser, getUserID } from "@/controller/UserController";
 
 export default async function (req, res) {
   try {
+    middleware(req,res,cors);
     switch (req.method) {
       case "GET":
-        if (req.query.uid) {
+        if (req.query.id) {
           getBukuID(req, res);
         } else {
           getBuku(req, res);

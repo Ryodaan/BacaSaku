@@ -33,7 +33,9 @@ model Buku {
   Judul              String
   Penerbit           String
   Penulis            String
+  Deskripsi          String?
   Tahunterbit        String
+  Gambar             String ?
   Koleksipribadi     Koleksipribadi[]
   Riwayat            Riwayat[]
   Peminjaman         Peminjaman[]
@@ -81,6 +83,7 @@ model Peminjaman {
   UserID              Int
   Buku                Buku      @relation(fields: [BukuID], references: [BukuID], onDelete: Cascade)
   BukuID              Int
+  Tanggalpeminjaman DateTime
   Tanggalpengembalian DateTime
   Statuspeminjaman    String
   Profile             Profile[]

@@ -11,8 +11,10 @@ export async function getBuku(req, res) {
         BukuID: true,
         Judul: true,
         Penerbit: true,
+        Deskripsi: true,
         Penulis: true,
         Tahunterbit: true,
+        Gambar: true,
       },
     });
 
@@ -32,8 +34,42 @@ export async function getBuku(req, res) {
   }
 }
 
+export async function getBukuID(req, res) {
+  const { id } = req.query;
+
+  try {
+    let buku = await prisma.buku.findUnique({
+      where: {
+        BukuID: parseInt(id),
+      },
+      // include: {
+      //   Profile: true,
+      // },
+    });
+
+    if (!buku) {
+      res.status(401).json({
+        message: "Buku tidak di temukan",
+        data: buku,
+      });
+    }
+
+    res.status(200).json({
+      message: "Book found successfully",
+      data: buku,
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({
+      message: "Internal server error",
+      error: error,
+    });
+  }
+}
+
+
 export async function createBuku(req, res) {
-    const { BukuID, Judul, Penerbit, Penulis, Tahunterbit } = req.body;
+    const { BukuID, Judul, Penerbit, Penulis, Tahunterbit, Gambar, Deskripsi, } = req.body;
   
     try {
       let buku = await prisma.buku.create({
@@ -41,8 +77,11 @@ export async function createBuku(req, res) {
             BukuID,
             Judul,
             Penerbit,
+            Deskripsi,
             Penulis,
             Tahunterbit,
+            Gambar,
+            // Gambar : Gambar.toString('base64'),
         },
       });
   
@@ -61,7 +100,7 @@ export async function createBuku(req, res) {
 
   export async function updateBuku(req, res) {
     const { id } = req.query;
-    const { Judul, Penerbit, Penulis, Tahunterbit } = req.body;
+    const { Judul, Penerbit, Penulis, Tahunterbit,  Deskripsi } = req.body;
   
     try {
       let buku = await prisma.buku.update({
@@ -70,7 +109,9 @@ export async function createBuku(req, res) {
             Judul,
             Penerbit,
             Penulis,
+            Deskripsi,
             Tahunterbit,
+            Gambar,
         },
       });
   
