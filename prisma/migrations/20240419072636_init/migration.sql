@@ -18,7 +18,9 @@ CREATE TABLE `Buku` (
     `Judul` VARCHAR(191) NOT NULL,
     `Penerbit` VARCHAR(191) NOT NULL,
     `Penulis` VARCHAR(191) NOT NULL,
+    `Deskripsi` VARCHAR(191) NULL,
     `Tahunterbit` VARCHAR(191) NOT NULL,
+    `Gambar` VARCHAR(191) NULL,
 
     PRIMARY KEY (`BukuID`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
@@ -67,6 +69,7 @@ CREATE TABLE `Peminjaman` (
     `PeminjamanID` INTEGER NOT NULL AUTO_INCREMENT,
     `UserID` INTEGER NOT NULL,
     `BukuID` INTEGER NOT NULL,
+    `Tanggalpeminjaman` DATETIME(3) NOT NULL,
     `Tanggalpengembalian` DATETIME(3) NOT NULL,
     `Statuspeminjaman` VARCHAR(191) NOT NULL,
 
