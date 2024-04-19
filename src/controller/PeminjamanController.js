@@ -179,16 +179,25 @@ export async function getPeminjamanUserID(req, res) {
 
 
 export async function createPeminjaman(req, res) {
-    const { UserID, BookID, TglPeminjaman, TglPengembalian } = req.body;
+    const { UserID, BookID, TglPeminjaman, TglPengembalian, Statuspeminjaman } = req.body;
   
     try {
 
       let peminjaman = await prisma.peminjaman.create({
         data: {
-          UserID: parseInt(UserID),
-          BookID: parseInt(BookID),
-          TglPeminjaman : new Date(TglPeminjaman),
-          TglPengembalian : new Date(TglPengembalian),
+          Tanggalpeminjaman : new Date(TglPeminjaman),
+          Tanggalpengembalian : new Date(TglPengembalian),
+          Statuspeminjaman: Statuspeminjaman,
+          User: {
+            connect: {
+              UserID: parseInt(UserID)
+            }
+          },
+          Buku: {
+            connect: {
+              BukuID: parseInt(BookID)
+            }
+          }
         },
       });
       res.status(201).json({

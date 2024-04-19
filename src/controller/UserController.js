@@ -59,13 +59,12 @@ export async function getUserID(req, res) {
   }
 }
 
-
 export async function login(req, res) {
   const {Username, Password} = req.body;
 
   try {
     const user = await prisma.user.findFirst({
-      where: { Username },
+      where: { Username: Username },
     });
 
     if (!user || !(await bcrypt.compare(Password, user.Password))) {
@@ -74,9 +73,18 @@ export async function login(req, res) {
     
     const { Password: _, ...userData } = user;
 
-    const token = jwt.sign({ userId: user.UserID }, 'iniadalahaku', { expiresIn: '1h' });
+    let role = 'pengguna';
+    
+    if (user.Role === 'admin') {
+      role = 'admin';
+    }
+    if (user.Role === 'petugas') {
+      role === 'petugas';
+    }
 
-    res.status(200).json({
+    const token = jwt.sign({ userId: user.UserID }, 'juldan', { expiresIn: '1h' });
+
+    res.status(201).json({
       message: 'Login berhasil',
       data: userData,
       token,
@@ -91,12 +99,47 @@ export async function login(req, res) {
   }
 }
 
+// export async function login(req, res) {
+//   const {Username, Password} = req.body;
+
+//   try {
+//     const user = await prisma.user.findFirst({
+//       where: { Username },
+//     });
+
+//     if (!user || !(await bcrypt.compare(Password, user.Password))) {
+//       return res.status(401).json({ message: 'Username atau password salah' });
+//     }
+    
+//     const { Password: _, ...userData } = user;
+
+//     const token = jwt.sign({ userId: user.UserID }, 'iniadalahaku', { expiresIn: '1h' });
+
+//     res.status(200).json({
+//       message: 'Login berhasil',
+//       data: userData,
+//       token,
+//     });
+
+//   } catch (error) {
+//     console.log(error);
+//     res.status(500).json({
+//       message: 'Internal server error',
+//       error: error,
+//     });
+//   }
+// }
+
 export async function createUser(req, res) {
   const { NamaLengkap, Alamat, Username, Email, Password } = req.body;
 
-  const userpassword = await bcrypt.hash(Password, 10);
-
   try {
+    const userpassword = await bcrypt.hash(Password, 10);
+    let userRole = 'pengguna';
+    if (Email.includes('@smk.admin.id')){
+      userRole = 'admin';
+    }
+
     let user = await prisma.user.create({
       data: {
         NamaLengkap,
@@ -104,6 +147,7 @@ export async function createUser(req, res) {
         Password : userpassword,
         Username,
         Email,
+        Role: userRole,
       },
     });
 
