@@ -85,7 +85,7 @@ model Peminjaman {
   BukuID              Int
   Tanggalpeminjaman DateTime
   Tanggalpengembalian DateTime
-  Statuspeminjaman    String
+  Statuspeminjaman Statuspeminjaman @default(dipinjam)
   Profile             Profile[]
 }
 
@@ -110,4 +110,10 @@ enum Role {
   pengguna
   petugas
   admin
+}
+
+enum Statuspeminjaman {
+  dipinjam
+  selesai
+  mangkrak
 }

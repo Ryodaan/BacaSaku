@@ -112,45 +112,97 @@ export async function getPeminjamanID(req, res) {
 
 
 export async function createPeminjaman(req, res) {
-    const { UserID, BookID, Tanggalpeminjaman, Tanggalpengembalian, Statuspeminjaman } = req.body;
-  
-    try {
+  const { UserID, BukuID, Tanggalpengembalian } = req.body;
+  const Tanggalpeminjaman = new Date();
 
-      let peminjaman = await prisma.peminjaman.create({
-        data: {
-          Tanggalpeminjaman : new Date(Tanggalpeminjaman),
-          Tanggalpengembalian : new Date(Tanggalpengembalian),
-          Statuspeminjaman: Statuspeminjaman,
-          User: {
-            connect: {
-              UserID: parseInt(UserID)
-            }
-          },
-          Buku: {
-            connect: {
-              BukuID: parseInt(BookID)
-            }
-          }
+  const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+  if (!dateRegex.test(Tanggalpengembalian)) {
+    return res.status(400).json({
+      message: "Format tanggal harus yyyy-mm-dd",
+    });
+  }
+
+  try {
+    //menghitung jumlah peminjaman yang di lakukan user perharinya
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const countPeminjaman = await prisma.peminjaman.count({
+      where: {
+        UserID: parseInt(UserID),
+        Tanggalpeminjaman: {
+          gte: today,
         },
-      });
-      res.status(201).json({
-        message: "Buku terpinjam",
-        data: peminjaman,
-      });
-  
-    } catch (error) {
-      console.log(error);
-      res.status(500).json({
-        message: "Internal server error",
-        error: error,
+      },
+    });
+
+    //membatasi jumlah peminjaman menjadi maksimal 3 buku perhari
+    if (countPeminjaman >= 3) {
+      return res.status(404).json({
+        message: "Anda sudah mencapai batas peminjaman pada hari ini",
       });
     }
+
+    //memeriksa pengguna apakah meminjam buku yang sama
+    const existingPeminjaman = await prisma.peminjaman.findFirst({
+      where: {
+        UserID: parseInt(UserID),
+        BukuID: parseInt(BukuID),
+        Statuspeminjaman: {
+          not: "selesai", //memerikas peminjaman yang belum selesai atau masih berstatus sedang pinjam
+        },
+      },
+    });
+
+    if (existingPeminjaman) {
+      return res.status(401).json({
+        message: "Anda saat ini masih meminjam buku yang sama",
+      });
+    }
+
+    let peminjaman = await prisma.peminjaman.create({
+      data: {
+        UserID: parseInt(UserID),
+        BukuID: parseInt(BukuID),
+        Tanggalpeminjaman,
+        // TglPeminjaman : new Date(TglPeminjaman),
+        Tanggalpengembalian: new Date(Tanggalpengembalian),
+      },
+    });
+
+    res.status(201).json({
+      message: "Buku terpinjam",
+      data: peminjaman,
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({
+      message: "Internal server error",
+      error: error,
+    });
   }
+}
 
   export async function getPeminjamanUserID(req, res) {
     const { userId } = req.query;
   
     try {
+
+      const user = await prisma.user.findUnique({
+        where: {
+            UserID: parseInt(userId),
+        },
+        select: {
+            UserID: true,
+        }
+    });
+
+    if (!user) {
+        return res.status(404).json({
+            message: "User tidak ditemukan",
+            data: [],
+        });
+    }
+
       let peminjaman = await prisma.peminjaman.findMany({
         where: {
           UserID: parseInt(userId), // Assuming UserID is a numeric field
@@ -171,35 +223,13 @@ export async function createPeminjaman(req, res) {
             }
           },
           Buku: true,
-          // Buku: {
-          //     select: {
-          //         BookID: true,
-          //         Judul: true,
-          //         Tahunterbit: true,
-          //         Penulis: true,
-          //         Jumlahhlmn: true,
-          //         Penerbit: true,
-          //         Deskripsi: true,
-          //         Gambar: true,
-          //     }
-          // },
-          // User: {
-          //   select: {
-          //     UserID: true,
-          //     Namalengkap: true,
-          //     Alamat: true,
-          //     Email: true,
-          //     Username: true,
-          //     Role: true,
-          //   }
-          // }
         },
       });
-  
-      if (!peminjaman || peminjaman.length === 0) {
-        return res.status(404).json({
-          message: "Peminjaman tidak ditemukan",
-          data: [],
+
+      if (peminjaman.length === 0) {
+        return res.status(200).json({
+          message: "Belum pinjam buku",
+          data:[],
         });
       }
   
@@ -229,7 +259,7 @@ export async function createPeminjaman(req, res) {
           Tanggalpeminjaman: {
             lt: new Date(), // Memeriksa peminjaman yang TglPengembalian-nya sudah lewat
           },
-          Status: "dipinjam", // Memeriksa peminjaman yang masih dalam status "Sedang Pinjam"
+          Statuspeminjaman: "dipinjam", // Memeriksa peminjaman yang masih dalam status "Sedang Pinjam"
         },
       });
   
@@ -238,7 +268,7 @@ export async function createPeminjaman(req, res) {
           peminjaman.map(async (p) => {
             await prisma.peminjaman.update({
               where: { PeminjamanID: p.PeminjamanID },
-              data: { Status: "selesai" },
+              data: { Statuspeminjaman: "selesai" },
             });
           })
         );
@@ -258,7 +288,7 @@ export async function createPeminjaman(req, res) {
       const peminjaman = await prisma.peminjaman.findMany({
         where: {
           UserID: parseInt(userId),
-          Status: "dipinjam",
+          Statuspeminjaman: "dipinjam",
         },
         include: {
           User: {
