@@ -251,7 +251,7 @@ export async function createPeminjaman(req, res) {
     }
   }
 
-  async function updatePeminjamanStatus() {
+  export async function updatePeminjamanStatus() {
     try {
       const peminjaman = await prisma.peminjaman.findMany({
         where: {
@@ -278,7 +278,7 @@ export async function createPeminjaman(req, res) {
   }
   
   // Fungsi untuk menjalankan updatePeminjamanStatus() setiap jam sekali
-  setInterval(updatePeminjamanStatus, 60000); // 3600000 milidetik = 1 jam
+  // setInterval(updatePeminjamanStatus, 60000); // 3600000 milidetik = 1 jam
 
   export async function getPeminjamanSedangPinjamUserID(req, res) {
     const { userId } = req.query;
@@ -301,9 +301,12 @@ export async function createPeminjaman(req, res) {
           Buku: true,
         },
       });
-  
+      
+      const dataCount = peminjaman.length;
+
       res.status(200).json({
         message: "Peminjaman ditemukan",
+        total: dataCount,
         data: peminjaman,
       });
     } catch (error) {

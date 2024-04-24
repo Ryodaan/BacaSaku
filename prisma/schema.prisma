@@ -33,9 +33,10 @@ model Buku {
   Judul              String
   Penerbit           String
   Penulis            String
+  File               String?               @db.LongText
   Deskripsi          String?
   Tahunterbit        String
-  Gambar             String ?
+  Gambar             String?
   Koleksipribadi     Koleksipribadi[]
   Riwayat            Riwayat[]
   Peminjaman         Peminjaman[]
@@ -78,14 +79,14 @@ model Ulasanbuku {
 }
 
 model Peminjaman {
-  PeminjamanID        Int       @id @default(autoincrement())
-  User                User      @relation(fields: [UserID], references: [UserID], onDelete: Cascade)
+  PeminjamanID        Int              @id @default(autoincrement())
+  User                User             @relation(fields: [UserID], references: [UserID], onDelete: Cascade)
   UserID              Int
-  Buku                Buku      @relation(fields: [BukuID], references: [BukuID], onDelete: Cascade)
+  Buku                Buku             @relation(fields: [BukuID], references: [BukuID], onDelete: Cascade)
   BukuID              Int
-  Tanggalpeminjaman DateTime
+  Tanggalpeminjaman   DateTime
   Tanggalpengembalian DateTime
-  Statuspeminjaman Statuspeminjaman @default(dipinjam)
+  Statuspeminjaman    Statuspeminjaman @default(dipinjam)
   Profile             Profile[]
 }
 

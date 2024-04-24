@@ -100,7 +100,7 @@ export async function createBuku(req, res) {
 
   export async function updateBuku(req, res) {
     const { id } = req.query;
-    const { Judul, Penerbit, Penulis, Tahunterbit,  Deskripsi } = req.body;
+    const { Judul, Penerbit, Penulis, Tahunterbit,  Deskripsi, Gambar, File } = req.body;
   
     try {
       let buku = await prisma.buku.update({
@@ -112,6 +112,7 @@ export async function createBuku(req, res) {
             Deskripsi,
             Tahunterbit,
             Gambar,
+            File,
         },
       });
   

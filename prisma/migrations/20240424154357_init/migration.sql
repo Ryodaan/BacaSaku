@@ -71,7 +71,7 @@ CREATE TABLE `Peminjaman` (
     `BukuID` INTEGER NOT NULL,
     `Tanggalpeminjaman` DATETIME(3) NOT NULL,
     `Tanggalpengembalian` DATETIME(3) NOT NULL,
-    `Statuspeminjaman` VARCHAR(191) NOT NULL,
+    `Statuspeminjaman` ENUM('dipinjam', 'selesai', 'mangkrak') NOT NULL DEFAULT 'dipinjam',
 
     PRIMARY KEY (`PeminjamanID`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
