@@ -171,7 +171,6 @@ export async function createPeminjaman(req, res) {
 
     res.status(201).json({
       message: "Buku terpinjam",
-      data: peminjaman,
     });
   } catch (error) {
     console.log(error);
