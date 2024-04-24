@@ -8,24 +8,9 @@ export async function getKoleksiUserID(req, res) {
   try {
     let koleksi = await prisma.koleksipribadi.findMany({
       where: { UserID: parseInt(userId) },
-      select: {
-        UserID: true,
-        BookID: true,
-        Buku: {
-          select: {
-            Judul: true,
-            Penulis: true,
-            Penerbit: true,
-            Gambar: true,
-          },
-        },
-        User: {
-          select: {
-            Username: true,
-            Email: true,
-          },
-        },
-      },
+      include:{
+        Buku:true
+      }
     });
 
     if (!koleksi || koleksi.length === 0) {
@@ -35,7 +20,7 @@ export async function getKoleksiUserID(req, res) {
       });
     }
 
-    res.status(201).json({
+    res.status(200).json({
       message: "Koleksi found successfully",
       data: koleksi,
     });

@@ -1,4 +1,4 @@
-import { addKoleksi, deleteKoleksi, getKoleksi, getKoleksiID } from "@/controller/KoleksiController";
+import { addKoleksi, deleteKoleksi, getKoleksi, getKoleksiID, getKoleksiUserID } from "@/controller/KoleksiController";
 
 export default async function handler(req, res) {
     try {
@@ -6,7 +6,11 @@ export default async function handler(req, res) {
         case "GET":
           if (req.query.id) {
             await getKoleksiID(req, res);
-          } else {
+          } 
+          else if (req.query.userId){
+            await getKoleksiUserID(req, res);
+          }
+          else {
             await getKoleksi(req, res);
           }
           break;

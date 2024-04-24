@@ -1,5 +1,5 @@
 
-import { createPeminjaman, getPeminjaman } from "@/controller/PeminjamanController";
+import { createPeminjaman, getPeminjamanID, getPeminjamanSedangPinjamUserID, getPeminjamanUserID } from "@/controller/PeminjamanController";
 import { cors, middleware } from "@/helpers/middleware";
 // import { createUser, getUser, getUserID } from "@/controller/UserController";
 
@@ -8,8 +8,8 @@ export default async function (req, res) {
     middleware(req,res,cors);
     switch (req.method) {
       case "GET":
-        if (req.query.id) {
-          await  getPeminjamanUserID(req, res);
+        if (req.query.userId) {
+          await  getPeminjamanSedangPinjamUserID(req, res);
         } else {
            await getPeminjamanID(req, res);
         }

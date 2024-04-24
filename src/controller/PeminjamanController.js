@@ -8,19 +8,19 @@ export async function getPeminjaman(req, res) {
         let peminjaman = await prisma.peminjaman.findMany({
             skip: skipValue,
             select: {
-                PinjamID: true,
+                PeminjamanID: true,
                 UserID: true,
                 BookID: true,
-                TglPeminjaman: true,
-                TglPengembalian: true,
-                Status: true,
+                Tanggalpeminjaman: true,
+                Tanggalpeminjaman: true,
+                Statuspeminjaman: true,
                 Buku: {
                   select: {
                     BookID : true,
                     Judul: true,
                     Tahunterbit: true,
                     Penulis: true,
-                    Jumlahhlmn: true,
+                  
                     Penerbit: true,
                     Deskripsi: true,
                     Gambar: true,
@@ -28,7 +28,7 @@ export async function getPeminjaman(req, res) {
                 },
                 User : {
                   select : {
-                    Namalengkap: true,
+                    NamaLengkap: true,
                     Alamat: true,
                     Email: true,
                     Username: true,
@@ -60,23 +60,22 @@ export async function getPeminjamanID(req, res) {
   try {
       let peminjaman = await prisma.peminjaman.findUnique({
           where: {
-              PinjamID: parseInt(id) // Assuming UserID is a numeric field
+              PeminjamanID: parseInt(id) // Assuming UserID is a numeric field
           },
           select: {
-              PinjamanID: true,
+              PeminjamanID: true,
               UserID: true,
               BukuID: true,
               Tanggalpeminjaman: true,
               Tanggalpengembalian: true,
               Statuspeminjaman: true,
-              Status: true,
               Buku: {
                   select: {
                       BukuID: true,
                       Judul: true,
                       Tahunterbit: true,
                       Penulis: true,
-                      Jumlahhlmn: true,
+           
                       Penerbit: true,
                       Deskripsi: true,
                       Gambar: true,
@@ -84,7 +83,7 @@ export async function getPeminjamanID(req, res) {
               },
               User: {
                 select : {
-                  Namalengkap: true,
+                  NamaLengkap: true,
                 }
               }
           }
@@ -111,82 +110,16 @@ export async function getPeminjamanID(req, res) {
   }
 }
 
-export async function getPeminjamanUserID(req, res) {
-  const { userId } = req.query;
-
-  try {
-      let peminjaman = await prisma.peminjaman.findMany({
-          where: {
-              UserID: parseInt(userId) // Assuming UserID is a numeric field
-          },
-          select: {
-              PinjamID: true,
-              UserID: true,
-              BookID: true,
-              TglPeminjaman: true,
-              TglPengembalian: true,
-              Status: true,
-              Buku: {
-                  select: {
-                      BookID: true,
-                      Judul: true,
-                      Tahunterbit: true,
-                      Penulis: true,
-                      Jumlahhlmn: true,
-                      Penerbit: true,
-                      Deskripsi: true,
-                      Gambar: true,
-                  }
-              },
-              User: {
-                select: {
-                  UserID: true,
-                  Namalengkap: true,
-                  Alamat: true,
-                  Email: true,
-                  Username: true,
-                  Role: true,
-                }
-              }
-          }
-      });
-
-      if (!peminjaman || peminjaman.length === 0) {
-        return res.status(404).json({
-          message: "Peminjaman tidak ditemukan",
-          data: []
-        });
-      }
-
-      peminjaman = peminjaman.map(item => ({
-        ...item,
-        TglPeminjaman: item.TglPeminjaman.toISOString().substring(0, 10),
-        TglPengembalian: item.TglPengembalian.toISOString().substring(0, 10),
-      }));
-
-      res.status(201).json({
-          message: "Peminjaman found successfully",
-          data: peminjaman,
-      });
-  } catch (error) {
-      console.log(error);
-      res.status(500).json({
-          message: "Internal server error",
-          error: error.message,
-      });
-  }
-}
-
 
 export async function createPeminjaman(req, res) {
-    const { UserID, BookID, TglPeminjaman, TglPengembalian, Statuspeminjaman } = req.body;
+    const { UserID, BookID, Tanggalpeminjaman, Tanggalpengembalian, Statuspeminjaman } = req.body;
   
     try {
 
       let peminjaman = await prisma.peminjaman.create({
         data: {
-          Tanggalpeminjaman : new Date(TglPeminjaman),
-          Tanggalpengembalian : new Date(TglPengembalian),
+          Tanggalpeminjaman : new Date(Tanggalpeminjaman),
+          Tanggalpengembalian : new Date(Tanggalpengembalian),
           Statuspeminjaman: Statuspeminjaman,
           User: {
             connect: {
@@ -210,6 +143,145 @@ export async function createPeminjaman(req, res) {
       res.status(500).json({
         message: "Internal server error",
         error: error,
+      });
+    }
+  }
+
+  export async function getPeminjamanUserID(req, res) {
+    const { userId } = req.query;
+  
+    try {
+      let peminjaman = await prisma.peminjaman.findMany({
+        where: {
+          UserID: parseInt(userId), // Assuming UserID is a numeric field
+        },
+        select: {
+          PeminjamanID: true,
+          UserID: true,
+          BukuID: true,
+          Tanggalpeminjaman: true,
+          Tanggalpengembalian: true,
+          Statuspeminjaman: true,
+          User: {
+            select: {
+              NamaLengkap: true,
+              Username: true,
+              Alamat: true,
+              Email: true,
+            }
+          },
+          Buku: true,
+          // Buku: {
+          //     select: {
+          //         BookID: true,
+          //         Judul: true,
+          //         Tahunterbit: true,
+          //         Penulis: true,
+          //         Jumlahhlmn: true,
+          //         Penerbit: true,
+          //         Deskripsi: true,
+          //         Gambar: true,
+          //     }
+          // },
+          // User: {
+          //   select: {
+          //     UserID: true,
+          //     Namalengkap: true,
+          //     Alamat: true,
+          //     Email: true,
+          //     Username: true,
+          //     Role: true,
+          //   }
+          // }
+        },
+      });
+  
+      if (!peminjaman || peminjaman.length === 0) {
+        return res.status(404).json({
+          message: "Peminjaman tidak ditemukan",
+          data: [],
+        });
+      }
+  
+      peminjaman = peminjaman.map((item) => ({
+        ...item,
+        Tanggalpeminjaman: item.Tanggalpeminjaman.toISOString().substring(0, 10),
+        Tanggalpengembalian: item.Tanggalpengembalian.toISOString().substring(0, 10),
+      }));
+  
+      res.status(201).json({
+        message: "Peminjaman found successfully",
+        data: peminjaman,
+      });
+    } catch (error) {
+      console.log(error);
+      res.status(500).json({
+        message: "Internal server error",
+        error: error.message,
+      });
+    }
+  }
+
+  async function updatePeminjamanStatus() {
+    try {
+      const peminjaman = await prisma.peminjaman.findMany({
+        where: {
+          Tanggalpeminjaman: {
+            lt: new Date(), // Memeriksa peminjaman yang TglPengembalian-nya sudah lewat
+          },
+          Status: "dipinjam", // Memeriksa peminjaman yang masih dalam status "Sedang Pinjam"
+        },
+      });
+  
+      if (peminjaman && peminjaman.length > 0) {
+        await Promise.all(
+          peminjaman.map(async (p) => {
+            await prisma.peminjaman.update({
+              where: { PeminjamanID: p.PeminjamanID },
+              data: { Status: "selesai" },
+            });
+          })
+        );
+      }
+    } catch (error) {
+      console.error("Error updating peminjaman status:", error);
+    }
+  }
+  
+  // Fungsi untuk menjalankan updatePeminjamanStatus() setiap jam sekali
+  setInterval(updatePeminjamanStatus, 60000); // 3600000 milidetik = 1 jam
+
+  export async function getPeminjamanSedangPinjamUserID(req, res) {
+    const { userId } = req.query;
+  
+    try {
+      const peminjaman = await prisma.peminjaman.findMany({
+        where: {
+          UserID: parseInt(userId),
+          Status: "dipinjam",
+        },
+        include: {
+          User: {
+            select : {
+              NamaLengkap: true,
+              Username: true,
+              Alamat: true,
+              Email: true,
+            }
+          },
+          Buku: true,
+        },
+      });
+  
+      res.status(200).json({
+        message: "Peminjaman ditemukan",
+        data: peminjaman,
+      });
+    } catch (error) {
+      console.error("Error getting peminjaman:", error);
+      res.status(500).json({
+        message: "Internal server error",
+        error: error.message,
       });
     }
   }
